@@ -1,6 +1,6 @@
 // 카카오 디벨로퍼스(https://developers.kakao.com)에서 발급받은 JavaScript 키
 // (카카오맵 표시 + 카카오톡 공유 버튼에 함께 사용됩니다)
-const KAKAO_JS_KEY = "REPLACE_ME";
+const KAKAO_JS_KEY = "d830304ea7198638d5dd2b4f80462923";
 
 // 예식 일시 (한국 시간 기준 고정)
 const WEDDING_AT = new Date("2026-10-10T12:30:00+09:00");
