@@ -188,19 +188,31 @@ function renderCalendar() {
 
 function renderCarousel(photoFiles, videoFiles) {
   const carousel = document.getElementById("carousel");
-  const dotsBox = document.getElementById("carousel-dots");
+  const thumbsBox = document.getElementById("carousel-thumbs");
+  const prevBtn = document.getElementById("carousel-prev");
+  const nextBtn = document.getElementById("carousel-next");
   const slides = [];
+  const thumbs = [];
 
   photoFiles.forEach((file) => {
+    const src = `assets/photos/${encodeURIComponent(file)}`;
+
     const slide = document.createElement("div");
     slide.className = "slide";
     const img = document.createElement("img");
-    img.src = `assets/photos/${encodeURIComponent(file)}`;
+    img.src = src;
     img.loading = "lazy";
     img.draggable = false;
-    img.addEventListener("click", () => openLightbox(img.src));
+    img.addEventListener("click", () => openLightbox(src));
     slide.appendChild(img);
     slides.push(slide);
+
+    const thumb = document.createElement("img");
+    thumb.className = "thumb";
+    thumb.src = src;
+    thumb.loading = "lazy";
+    thumb.draggable = false;
+    thumbs.push(thumb);
   });
 
   videoFiles.forEach((file) => {
@@ -213,24 +225,55 @@ function renderCarousel(photoFiles, videoFiles) {
     video.preload = "metadata";
     slide.appendChild(video);
     slides.push(slide);
+
+    const thumb = document.createElement("div");
+    thumb.className = "thumb thumb-video";
+    thumb.textContent = "▶";
+    thumbs.push(thumb);
   });
 
   slides.forEach((s) => carousel.appendChild(s));
-
-  // 인디케이터 점
-  slides.forEach((_, i) => {
-    const dot = document.createElement("span");
-    dot.className = "dot" + (i === 0 ? " active" : "");
-    dotsBox.appendChild(dot);
+  thumbs.forEach((t, i) => {
+    t.addEventListener("click", () => goTo(i));
+    thumbsBox.appendChild(t);
   });
+  if (thumbs.length > 0) thumbs[0].classList.add("active");
 
-  carousel.addEventListener("scroll", () => {
-    // 슬라이드 간격(gap)을 포함한 실제 스냅 간격으로 현재 인덱스 계산
-    const stride = slides.length > 1
+  if (slides.length <= 1) {
+    prevBtn.hidden = true;
+    nextBtn.hidden = true;
+  }
+
+  function stride() {
+    return slides.length > 1
       ? slides[1].offsetLeft - slides[0].offsetLeft
       : carousel.clientWidth;
-    const idx = Math.round(carousel.scrollLeft / stride);
-    [...dotsBox.children].forEach((d, i) => d.classList.toggle("active", i === idx));
+  }
+
+  function currentIdx() {
+    return Math.round(carousel.scrollLeft / stride());
+  }
+
+  // PC에서는 스와이프가 안 되므로 좌우 화살표와 썸네일 클릭으로 이동
+  function goTo(i) {
+    const idx = Math.max(0, Math.min(slides.length - 1, i));
+    carousel.scrollTo({ left: stride() * idx, behavior: "smooth" });
+  }
+
+  prevBtn.addEventListener("click", () => goTo(currentIdx() - 1));
+  nextBtn.addEventListener("click", () => goTo(currentIdx() + 1));
+
+  carousel.addEventListener("scroll", () => {
+    const idx = currentIdx();
+    thumbs.forEach((t, i) => t.classList.toggle("active", i === idx));
+    // 활성 썸네일이 썸네일 줄 가운데쯤 오도록 따라 스크롤
+    const active = thumbs[idx];
+    if (active) {
+      thumbsBox.scrollTo({
+        left: active.offsetLeft - (thumbsBox.clientWidth - active.clientWidth) / 2,
+        behavior: "smooth"
+      });
+    }
     // 슬라이드가 넘어가면 재생 중이던 영상 일시정지
     carousel.querySelectorAll("video").forEach((v) => {
       const slideIdx = slides.findIndex((s) => s.contains(v));

@@ -60,8 +60,9 @@
       저희의 새로운 시작을<br>
       가까이에서 축복해 주시면 감사하겠습니다.
     </p>
-    <p class="greeting-names">
-      신랑 <strong>허웅</strong> · 신부 <strong>홍세정</strong>
+    <p class="greeting-parents">
+      <span class="parents-line">신랑아버지 · 신랑어머니<small>의 아들</small><strong>웅</strong></span>
+      <span class="parents-line">신부아버지 · 신부어머니<small>의 딸</small><strong>세정</strong></span>
     </p>
   </section>
 
@@ -80,10 +81,14 @@
 
   <section id="gallery" class="section">
     <h2 class="section-title">우리의 순간</h2>
-    <div id="carousel" class="carousel">
-      <!-- Photo 폴더의 사진/영상이 js/main.js에서 자동으로 채워집니다 -->
+    <div class="carousel-wrap">
+      <div id="carousel" class="carousel">
+        <!-- Photo 폴더의 사진/영상이 js/main.js에서 자동으로 채워집니다 -->
+      </div>
+      <button id="carousel-prev" class="carousel-arrow prev" type="button" aria-label="이전 사진">‹</button>
+      <button id="carousel-next" class="carousel-arrow next" type="button" aria-label="다음 사진">›</button>
     </div>
-    <div id="carousel-dots" class="carousel-dots" aria-hidden="true"></div>
+    <div id="carousel-thumbs" class="carousel-thumbs"></div>
   </section>
 
   <section id="location" class="section">
@@ -110,6 +115,14 @@
           <div class="account-info"><small>신랑</small><span class="account-holder">허웅</span><span class="account-number" data-copy="OO은행 000-0000-0000000">OO은행 000-0000-0000000</span></div>
           <button class="copy-btn" type="button">복사</button>
         </li>
+        <li>
+          <div class="account-info"><small>아버님</small><span class="account-holder">허OO</span><span class="account-number" data-copy="OO은행 000-0000-0000000">OO은행 000-0000-0000000</span></div>
+          <button class="copy-btn" type="button">복사</button>
+        </li>
+        <li>
+          <div class="account-info"><small>어머님</small><span class="account-holder">OOO</span><span class="account-number" data-copy="OO은행 000-0000-0000000">OO은행 000-0000-0000000</span></div>
+          <button class="copy-btn" type="button">복사</button>
+        </li>
       </ul>
     </details>
 
@@ -118,6 +131,14 @@
       <ul class="account-list">
         <li>
           <div class="account-info"><small>신부</small><span class="account-holder">홍세정</span><span class="account-number" data-copy="OO은행 000-0000-0000000">OO은행 000-0000-0000000</span></div>
+          <button class="copy-btn" type="button">복사</button>
+        </li>
+        <li>
+          <div class="account-info"><small>아버님</small><span class="account-holder">홍OO</span><span class="account-number" data-copy="OO은행 000-0000-0000000">OO은행 000-0000-0000000</span></div>
+          <button class="copy-btn" type="button">복사</button>
+        </li>
+        <li>
+          <div class="account-info"><small>어머님</small><span class="account-holder">OOO</span><span class="account-number" data-copy="OO은행 000-0000-0000000">OO은행 000-0000-0000000</span></div>
           <button class="copy-btn" type="button">복사</button>
         </li>
       </ul>
