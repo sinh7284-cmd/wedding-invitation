@@ -1,0 +1,247 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: #faf7f2;
+  color: #2b2b2b;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.6;
+  touch-action: pan-y;
+}
+
+body.gate-locked #invitation-content,
+body.gate-locked #bgm-toggle {
+  display: none;
+}
+
+.section {
+  padding: 48px 24px;
+  text-align: center;
+  border-bottom: 1px solid #eee5d8;
+}
+
+.section-title {
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: #b08d57;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+#hero {
+  padding: 80px 24px;
+}
+
+.hero-date {
+  color: #b08d57;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.hero-names {
+  font-size: 32px;
+  font-weight: 400;
+  margin-bottom: 16px;
+}
+
+.hero-names span {
+  color: #b08d57;
+  margin: 0 8px;
+}
+
+.hero-venue {
+  color: #666;
+}
+
+.greeting-text {
+  color: #444;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.gallery-grid img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: pan-y;
+}
+
+.location-address {
+  margin-bottom: 20px;
+  color: #444;
+}
+
+.map-links {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.map-btn {
+  flex: 1;
+  max-width: 120px;
+  padding: 10px;
+  border: 1px solid #b08d57;
+  border-radius: 6px;
+  color: #b08d57;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.guestbook-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.guestbook-form input,
+.guestbook-form textarea {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.guestbook-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.guestbook-form button {
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  background: #b08d57;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.guestbook-list {
+  list-style: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guestbook-list li {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.guestbook-list .g-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #b08d57;
+  margin-bottom: 4px;
+}
+
+.guestbook-list .g-message {
+  font-size: 14px;
+  color: #333;
+  white-space: pre-wrap;
+}
+
+.kakao-share-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #fee500;
+  color: #3c1e1e;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bgm-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 18px;
+  z-index: 50;
+}
+
+.entry-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #faf7f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.entry-gate[hidden] {
+  display: none;
+}
+
+.entry-gate-box {
+  text-align: center;
+  padding: 32px;
+}
+
+.entry-gate-title {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: #b08d57;
+}
+
+.entry-gate-desc {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.entry-gate-box input {
+  display: block;
+  width: 200px;
+  margin: 0 auto 12px;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.entry-gate-box button {
+  width: 200px;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  background: #b08d57;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.error-msg {
+  color: #c0392b;
+  font-size: 13px;
+  margin-top: 12px;
+}

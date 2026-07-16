@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>관리자</title>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<div id="login-box" class="box">
+  <h1>관리자 로그인</h1>
+  <input type="email" id="admin-email" placeholder="이메일" autocomplete="username">
+  <input type="password" id="admin-password" placeholder="비밀번호" autocomplete="current-password">
+  <button id="login-btn" type="button">로그인</button>
+  <p id="login-error" class="error-msg" hidden>로그인 실패</p>
+</div>
+
+<div id="panel-box" class="box" hidden>
+  <h1>입장 코드 설정</h1>
+  <label class="toggle-row">
+    <span>입장 코드 사용</span>
+    <input type="checkbox" id="entry-toggle">
+  </label>
+  <input type="text" id="entry-code-value" placeholder="입장 코드 (숫자 4~6자리 권장)" maxlength="6">
+  <button id="save-btn" type="button">저장</button>
+  <p id="save-status" class="status-msg" hidden></p>
+  <button id="logout-btn" type="button" class="logout-btn">로그아웃</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>신랑 ♥ 신부, 결혼합니다</title>
+<meta name="description" content="2026년 O월 O일 O요일 낮 O시, OO웨딩홀에서 신랑 신부의 결혼식에 여러분을 초대합니다.">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="신랑 ♥ 신부, 결혼합니다">
+<meta property="og:description" content="2026년 O월 O일 O요일 낮 O시, OO웨딩홀">
+<meta property="og:image" content="https://REPLACE-WITH-YOUR-DOMAIN.vercel.app/assets/og-image.jpg">
+<meta property="og:url" content="https://REPLACE-WITH-YOUR-DOMAIN.vercel.app/">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="gate-locked">
+
+<div id="entry-gate" class="entry-gate" hidden>
+  <div class="entry-gate-box">
+    <p class="entry-gate-title">초대합니다</p>
+    <p class="entry-gate-desc">입장 코드를 입력해주세요</p>
+    <input type="password" id="entry-code-input" inputmode="numeric" maxlength="6" autocomplete="off">
+    <button id="entry-code-submit" type="button">확인</button>
+    <p id="entry-code-error" class="error-msg" hidden>코드가 올바르지 않습니다</p>
+  </div>
+</div>
+
+<main id="invitation-content">
+
+  <section id="hero" class="section">
+    <p class="hero-date">2026. 0. 0. SAT</p>
+    <h1 class="hero-names">신랑 <span>&amp;</span> 신부</h1>
+    <p class="hero-venue">OO웨딩홀 3층 그랜드홀</p>
+  </section>
+
+  <section id="greeting" class="section">
+    <h2 class="section-title">인사말</h2>
+    <p class="greeting-text">
+      두 사람이 하나 되어 새로운 삶을 시작합니다.<br>
+      귀한 걸음 하시어 축복해 주시면 감사하겠습니다.
+    </p>
+  </section>
+
+  <section id="gallery" class="section">
+    <h2 class="section-title">우리의 순간</h2>
+    <div id="gallery-grid" class="gallery-grid">
+      <!-- Photo 폴더의 이미지가 js/main.js에서 자동으로 채워집니다 -->
+    </div>
+  </section>
+
+  <section id="location" class="section">
+    <h2 class="section-title">오시는 길</h2>
+    <p class="location-address">서울특별시 OO구 OO로 00 OO웨딩홀 3층</p>
+    <div class="map-links">
+      <a class="map-btn" id="link-tmap" href="#">티맵</a>
+      <a class="map-btn" id="link-kakaomap" href="#">카카오맵</a>
+      <a class="map-btn" id="link-navermap" href="#">네이버지도</a>
+    </div>
+  </section>
+
+  <section id="guestbook" class="section">
+    <h2 class="section-title">축하 메시지</h2>
+    <form id="guestbook-form" class="guestbook-form">
+      <input type="text" id="guestbook-name" placeholder="이름" maxlength="20" required>
+      <textarea id="guestbook-message" placeholder="따뜻한 축하 메시지를 남겨주세요" maxlength="300" required></textarea>
+      <button type="submit">메시지 남기기</button>
+    </form>
+    <ul id="guestbook-list" class="guestbook-list"></ul>
+  </section>
+
+  <section id="share" class="section">
+    <button id="kakao-share-btn" class="kakao-share-btn" type="button">카카오톡으로 공유하기</button>
+  </section>
+
+</main>
+
+<button id="bgm-toggle" class="bgm-toggle" type="button" aria-label="배경음악 재생">🔇</button>
+<audio id="bgm" loop preload="none"></audio>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
