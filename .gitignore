@@ -2,3 +2,11 @@
 Thumbs.db
 node_modules/
 .claude/
+
+# 원본 사진은 용량이 커서 git에 올리지 않습니다.
+# assets/photos/(리사이즈본)와 assets/og-image.jpg만 실제로 배포됩니다.
+Photo/*.jpg
+Photo/*.jpeg
+Photo/*.png
+Photo/*.webp
+Photo/thumbnail/

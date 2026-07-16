@@ -30,7 +30,7 @@ function renderGallery(photoFiles) {
   const grid = document.getElementById("gallery-grid");
   photoFiles.forEach((file) => {
     const img = document.createElement("img");
-    img.src = `Photo/${encodeURIComponent(file)}`;
+    img.src = `assets/photos/${encodeURIComponent(file)}`;
     img.loading = "lazy";
     img.draggable = false;
     grid.appendChild(img);
