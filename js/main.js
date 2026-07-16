@@ -3,9 +3,9 @@ const KAKAO_JS_KEY = "REPLACE_ME";
 
 // 지도 좌표 / 장소명 (오시는 길 버튼용)
 const VENUE = {
-  name: "OO웨딩홀",
-  lat: 37.5665,
-  lng: 126.9780
+  name: "카이스트 노천극장",
+  lat: 36.3707615,
+  lng: 127.3579429
 };
 
 init();

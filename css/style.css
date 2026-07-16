@@ -66,6 +66,17 @@ body.gate-locked #bgm-toggle {
   color: #444;
 }
 
+.greeting-names {
+  margin-top: 24px;
+  color: #666;
+  font-size: 14px;
+}
+
+.greeting-names strong {
+  color: #2b2b2b;
+  font-weight: 600;
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
