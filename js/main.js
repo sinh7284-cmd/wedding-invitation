@@ -215,6 +215,18 @@ function renderCarousel(photoFiles, videoFiles) {
     thumbs.push(thumb);
   });
 
+  // 화면에 보이는 영상만 자동 재생 (브라우저 정책상 자동 재생은 음소거 필수)
+  const videoAutoplay = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const v = entry.target;
+      if (entry.isIntersecting) {
+        v.play().catch(() => {});
+      } else {
+        v.pause();
+      }
+    });
+  }, { threshold: 0.6 });
+
   videoFiles.forEach((file) => {
     const slide = document.createElement("div");
     slide.className = "slide";
@@ -222,7 +234,10 @@ function renderCarousel(photoFiles, videoFiles) {
     video.src = `Photo/video/${encodeURIComponent(file)}`;
     video.controls = true;
     video.playsInline = true;
+    video.muted = true;
+    video.loop = true;
     video.preload = "metadata";
+    videoAutoplay.observe(video);
     slide.appendChild(video);
     slides.push(slide);
 
