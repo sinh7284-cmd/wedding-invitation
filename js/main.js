@@ -78,18 +78,15 @@ function pinHeroHeight() {
   window.addEventListener("orientationchange", () => setTimeout(set, 300));
 }
 
-/* ---------- 낙엽 파티클 (히어로) ---------- */
+/* ---------- 비눗방울 파티클 (히어로) ---------- */
 
-// 가을 낙엽(단풍·은행잎)이 메인 사진 위로 흩날리는 캔버스 애니메이션
+// 투명한 비눗방울이 메인 사진 위로 떠다니는 캔버스 애니메이션
 function setupLeaves() {
   const canvas = document.getElementById("leaves-canvas");
   if (!canvas || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   const ctx = canvas.getContext("2d");
-  // 비눗방울 느낌의 밝은 파스텔 톤 (반투명으로 그려짐)
-  const COLORS = ["#ffd98e", "#ffe8b8", "#ffc9a3", "#fff3c9", "#ffddc2"];
   const COUNT = 16;
-  const LEAF_ALPHA = 0.45;
   let leaves = [];
   let running = true;
 
@@ -105,50 +102,37 @@ function setupLeaves() {
     return {
       x: Math.random() * w,
       y: fromTop ? -20 : Math.random() * h,
-      size: 7 + Math.random() * 9,
+      size: 5 + Math.random() * 11,
       speedY: 0.5 + Math.random() * 0.9,
       swayAmp: 28 + Math.random() * 40,
       swayFreq: 0.4 + Math.random() * 0.7,
       phase: Math.random() * Math.PI * 2,
-      rot: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.03,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      shape: Math.random() < 0.5 ? "maple" : "ginkgo",
       t: Math.random() * 100
     };
   }
 
   function drawLeaf(l) {
+    const s = l.size;
     ctx.save();
     ctx.translate(l.x + Math.sin(l.t * l.swayFreq + l.phase) * l.swayAmp * 0.4, l.y);
-    ctx.rotate(l.rot);
-    ctx.fillStyle = l.color;
-    ctx.globalAlpha = LEAF_ALPHA;
-    const s = l.size;
+
+    // 방울 본체: 아주 옅은 반투명 원
     ctx.beginPath();
-    if (l.shape === "ginkgo") {
-      // 은행잎: 부채꼴
-      ctx.moveTo(0, s * 0.6);
-      ctx.quadraticCurveTo(-s, s * 0.1, -s * 0.55, -s * 0.55);
-      ctx.quadraticCurveTo(0, -s * 0.15, s * 0.55, -s * 0.55);
-      ctx.quadraticCurveTo(s, s * 0.1, 0, s * 0.6);
-    } else {
-      // 단풍잎: 뾰족한 잎 여러 갈래를 단순화한 별 모양
-      for (let i = 0; i < 5; i++) {
-        const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
-        const outer = s;
-        const inner = s * 0.45;
-        ctx.lineTo(Math.cos(a) * outer, Math.sin(a) * outer);
-        ctx.lineTo(Math.cos(a + Math.PI / 5) * inner, Math.sin(a + Math.PI / 5) * inner);
-      }
-      ctx.closePath();
-    }
+    ctx.arc(0, 0, s, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.10)";
     ctx.fill();
-    // 비눗방울처럼 윤곽에 밝은 하이라이트를 살짝 얹는다
-    ctx.globalAlpha = LEAF_ALPHA * 0.7;
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.lineWidth = 1;
+
+    // 테두리 링
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+    ctx.lineWidth = 1.2;
     ctx.stroke();
+
+    // 왼쪽 위 반사광
+    ctx.beginPath();
+    ctx.arc(-s * 0.35, -s * 0.35, s * 0.22, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+    ctx.fill();
+
     ctx.restore();
   }
 
@@ -164,7 +148,6 @@ function setupLeaves() {
     leaves.forEach((l) => {
       l.t += 0.016;
       l.y += l.speedY;
-      l.rot += l.rotSpeed;
       if (l.y > canvas.clientHeight + 24) Object.assign(l, newLeaf(true));
       drawLeaf(l);
     });
