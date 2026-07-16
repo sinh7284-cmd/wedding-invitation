@@ -39,12 +39,25 @@ function renderGallery(photoFiles) {
 
 function setupMapLinks() {
   const { name, lat, lng } = VENUE;
-  document.getElementById("link-tmap").href =
-    `tmap://route?goalname=${encodeURIComponent(name)}&goalx=${lng}&goaly=${lat}`;
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // 카카오맵은 웹/모바일 모두 같은 https 링크로 동작
   document.getElementById("link-kakaomap").href =
     `https://map.kakao.com/link/to/${encodeURIComponent(name)},${lat},${lng}`;
-  document.getElementById("link-navermap").href =
-    `nmap://route/public?dlat=${lat}&dlng=${lng}&dname=${encodeURIComponent(name)}`;
+
+  if (isMobile) {
+    // tmap:// , nmap:// 은 앱 전용 스킴이라 모바일에서만 동작
+    document.getElementById("link-tmap").href =
+      `tmap://route?goalname=${encodeURIComponent(name)}&goalx=${lng}&goaly=${lat}`;
+    document.getElementById("link-navermap").href =
+      `nmap://route/public?dlat=${lat}&dlng=${lng}&dname=${encodeURIComponent(name)}`;
+  } else {
+    // PC: 티맵은 웹 버전이 없어 숨기고, 네이버지도는 웹 지도로 연결
+    document.getElementById("link-tmap").hidden = true;
+    document.getElementById("link-navermap").href =
+      `https://map.naver.com/p/directions/-/${lng},${lat},${encodeURIComponent(name)}/-/transit`;
+    document.getElementById("link-navermap").target = "_blank";
+  }
 }
 
 // 핀치줌 / 더블탭줌 / 롱프레스 저장(컨텍스트 메뉴)을 차단합니다.
