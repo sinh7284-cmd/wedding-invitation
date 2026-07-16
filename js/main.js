@@ -24,6 +24,7 @@ async function init() {
     .then((res) => res.json())
     .catch(() => ({ hero: null, photos: [], videos: [], bgm: [] }));
 
+  pinHeroHeight();
   setupLeaves();
   renderCalendar();
   renderCarousel(manifest.photos, manifest.videos || []);
@@ -38,6 +39,21 @@ async function init() {
   setupGuestbook();
   setupEntryGate();
   setupKakaoShare();
+}
+
+/* ---------- 히어로 높이 고정 ---------- */
+
+// 일부 모바일 브라우저(카카오톡 인앱 등)는 스크롤 중 주소창이 접힐 때
+// vh/svh 값을 다시 계산해 사진이 확대되어 보인다.
+// 로드 시점의 화면 높이를 픽셀로 고정해 스크롤 중에는 절대 변하지 않게 한다.
+function pinHeroHeight() {
+  const hero = document.getElementById("hero");
+  const set = () => {
+    hero.style.height = Math.min(window.innerHeight, 940) + "px";
+  };
+  set();
+  // 가로/세로 회전 시에만 다시 계산 (주소창 변화로 인한 resize는 무시)
+  window.addEventListener("orientationchange", () => setTimeout(set, 300));
 }
 
 /* ---------- 낙엽 파티클 (히어로) ---------- */
@@ -581,6 +597,7 @@ function setupBgmPlaylist(bgmFiles) {
 
   let trackIndex = 0;
   let playing = false;
+  let userTurnedOff = false;
 
   loadTrack(trackIndex);
 
@@ -594,12 +611,27 @@ function setupBgmPlaylist(bgmFiles) {
     if (playing) {
       bgm.pause();
       btn.textContent = "🔇";
+      userTurnedOff = true;
     } else {
       bgm.play().catch(() => {});
       btn.textContent = "🔊";
     }
     playing = !playing;
   });
+
+  // 브라우저 정책상 소리 있는 자동재생은 차단되므로,
+  // 방문자가 화면을 처음 터치/클릭하는 순간 음악을 자동 시작한다.
+  // (스피커 버튼으로 직접 끈 경우에는 다시 켜지 않음)
+  function autoStart() {
+    if (!playing && !userTurnedOff) {
+      bgm.play().then(() => {
+        playing = true;
+        btn.textContent = "🔊";
+      }).catch(() => {});
+    }
+  }
+  document.addEventListener("touchstart", autoStart, { once: true, passive: true });
+  document.addEventListener("click", autoStart, { once: true });
 
   function loadTrack(index) {
     bgm.src = `Sound/${encodeURIComponent(bgmFiles[index])}`;
@@ -611,7 +643,10 @@ function setupBgmPlaylist(bgmFiles) {
 function setupAccountCopy() {
   document.querySelectorAll(".copy-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const number = btn.parentElement.querySelector(".account-number").dataset.copy;
+      // 화면 표시 텍스트("OO은행 000-0000-...")에서 숫자만 추출해 복사한다.
+      // 은행 앱 계좌번호 입력칸에 바로 붙여넣을 수 있게 하기 위함.
+      const displayed = btn.parentElement.querySelector(".account-number").textContent;
+      const number = displayed.replace(/[^0-9]/g, "");
       try {
         await navigator.clipboard.writeText(number);
         const orig = btn.textContent;

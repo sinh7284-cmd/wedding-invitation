@@ -274,9 +274,11 @@ body.gate-locked #bgm-toggle {
 }
 
 .calendar .calendar-note {
-  margin-top: 10px;
-  font-size: 12px;
-  color: var(--ink-soft);
+  margin-top: 12px;
+  font-family: "Gowun Batang", serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--maple);
 }
 
 /* ---------- 카운트다운 ---------- */

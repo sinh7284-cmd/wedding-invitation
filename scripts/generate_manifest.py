@@ -1,5 +1,7 @@
+import hashlib
 import json
 import os
+import re
 
 from PIL import Image, ImageOps
 
@@ -13,6 +15,8 @@ PHOTOS_OUT_DIR = os.path.join(BASE_DIR, "assets", "photos")
 OG_IMAGE_PATH = os.path.join(BASE_DIR, "assets", "og-image.jpg")
 HERO_IMAGE_PATH = os.path.join(BASE_DIR, "assets", "hero.jpg")
 MANIFEST_PATH = os.path.join(BASE_DIR, "assets", "manifest.json")
+OG_HASH_PATH = os.path.join(BASE_DIR, "assets", "og-image.hash")
+INDEX_PATH = os.path.join(BASE_DIR, "index.html")
 
 PHOTO_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 AUDIO_EXTS = {".mp3", ".m4a", ".ogg"}
@@ -66,6 +70,41 @@ def save_og_image(src_path):
     canvas.save(OG_IMAGE_PATH, quality=OG_QUALITY, optimize=True)
 
 
+def bump_og_version_if_changed():
+    # 썸네일(og-image.jpg) 내용이 이전과 달라졌으면 index.html의
+    # "og-image.jpg?v=숫자"를 1 올린다. 카카오톡이 이미지를 주소 기준으로
+    # 캐시하기 때문에, 주소가 바뀌어야 새 썸네일을 가져간다.
+    with open(OG_IMAGE_PATH, "rb") as f:
+        new_hash = hashlib.md5(f.read()).hexdigest()
+
+    old_hash = None
+    if os.path.exists(OG_HASH_PATH):
+        with open(OG_HASH_PATH, "r", encoding="utf-8") as f:
+            old_hash = f.read().strip()
+
+    if new_hash == old_hash:
+        return False
+
+    with open(OG_HASH_PATH, "w", encoding="utf-8") as f:
+        f.write(new_hash)
+
+    if old_hash is None:
+        # 첫 실행: 기준 해시만 기록하고 버전은 올리지 않는다.
+        return False
+
+    with open(INDEX_PATH, "r", encoding="utf-8") as f:
+        html = f.read()
+    html, n = re.subn(
+        r"og-image\.jpg\?v=(\d+)",
+        lambda m: f"og-image.jpg?v={int(m.group(1)) + 1}",
+        html,
+    )
+    if n > 0:
+        with open(INDEX_PATH, "w", encoding="utf-8", newline="") as f:
+            f.write(html)
+    return n > 0
+
+
 def main():
     os.makedirs(PHOTOS_OUT_DIR, exist_ok=True)
     os.makedirs(os.path.dirname(MANIFEST_PATH), exist_ok=True)
@@ -84,8 +123,10 @@ def main():
 
     # 카카오톡 썸네일
     thumb_files = list_files(THUMB_SRC_DIR, PHOTO_EXTS)
+    og_version_bumped = False
     if thumb_files:
         save_og_image(os.path.join(THUMB_SRC_DIR, thumb_files[0]))
+        og_version_bumped = bump_og_version_if_changed()
 
     # 첫 화면 대형 사진
     hero_files = list_files(HERO_SRC_DIR, PHOTO_EXTS)
@@ -120,6 +161,8 @@ def main():
         print("경고: Photo/main/ 폴더에 사진이 없어 메인 대형 사진을 만들지 못했습니다.")
     if thumb_files:
         print(f"카카오톡 썸네일: Photo/thumbnail/{thumb_files[0]} -> assets/og-image.jpg")
+        if og_version_bumped:
+            print("썸네일이 바뀌어 index.html의 og:image 버전 번호를 자동으로 올렸습니다.")
     else:
         print("경고: Photo/thumbnail/ 폴더에 사진이 없어 og-image.jpg를 갱신하지 못했습니다.")
 
