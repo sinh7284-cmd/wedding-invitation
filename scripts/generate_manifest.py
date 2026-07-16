@@ -5,21 +5,29 @@ from PIL import Image, ImageOps
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PHOTO_DIR = os.path.join(BASE_DIR, "Photo")
-THUMB_SRC_DIR = os.path.join(PHOTO_DIR, "thumbnail")
+THUMB_SRC_DIR = os.path.join(PHOTO_DIR, "thumbnail")   # 카카오톡 공유 썸네일용 (1장)
+HERO_SRC_DIR = os.path.join(PHOTO_DIR, "main")         # 첫 화면 대형 사진용 (1장)
+VIDEO_DIR = os.path.join(PHOTO_DIR, "video")           # 갤러리 영상 (50MB 이하 권장)
 SOUND_DIR = os.path.join(BASE_DIR, "Sound")
 PHOTOS_OUT_DIR = os.path.join(BASE_DIR, "assets", "photos")
 OG_IMAGE_PATH = os.path.join(BASE_DIR, "assets", "og-image.jpg")
+HERO_IMAGE_PATH = os.path.join(BASE_DIR, "assets", "hero.jpg")
 MANIFEST_PATH = os.path.join(BASE_DIR, "assets", "manifest.json")
 
 PHOTO_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 AUDIO_EXTS = {".mp3", ".m4a", ".ogg"}
+VIDEO_EXTS = {".mp4", ".webm"}
 
 GALLERY_MAX_WIDTH = 1600
 GALLERY_QUALITY = 82
+HERO_MAX_WIDTH = 1080
+HERO_QUALITY = 84
 # 카카오톡 미리보기가 이미지를 자르지 않도록 2:1 비율 + 여백(contain) 방식 사용
 OG_SIZE = (800, 400)
 OG_QUALITY = 85
 OG_BG_COLOR = (250, 246, 236)  # 청첩장 배경과 같은 크림색
+
+VIDEO_WARN_MB = 50
 
 
 def list_files(directory, exts):
@@ -35,12 +43,12 @@ def load_image(path):
     return ImageOps.exif_transpose(Image.open(path).convert("RGB"))
 
 
-def save_gallery_photo(src_path, out_name):
+def save_resized(src_path, out_path, max_width, quality):
     img = load_image(src_path)
-    if img.width > GALLERY_MAX_WIDTH:
-        ratio = GALLERY_MAX_WIDTH / img.width
-        img = img.resize((GALLERY_MAX_WIDTH, int(img.height * ratio)), Image.LANCZOS)
-    img.save(os.path.join(PHOTOS_OUT_DIR, out_name), quality=GALLERY_QUALITY, optimize=True)
+    if img.width > max_width:
+        ratio = max_width / img.width
+        img = img.resize((max_width, int(img.height * ratio)), Image.LANCZOS)
+    img.save(out_path, quality=quality, optimize=True)
 
 
 def save_og_image(src_path):
@@ -65,30 +73,53 @@ def main():
     for f in os.listdir(PHOTOS_OUT_DIR):
         os.remove(os.path.join(PHOTOS_OUT_DIR, f))
 
+    # 갤러리 사진
     gallery_files = list_files(PHOTO_DIR, PHOTO_EXTS)
     processed_names = []
     for f in gallery_files:
         out_name = os.path.splitext(f)[0] + ".jpg"
-        save_gallery_photo(os.path.join(PHOTO_DIR, f), out_name)
+        save_resized(os.path.join(PHOTO_DIR, f), os.path.join(PHOTOS_OUT_DIR, out_name),
+                     GALLERY_MAX_WIDTH, GALLERY_QUALITY)
         processed_names.append(out_name)
 
+    # 카카오톡 썸네일
     thumb_files = list_files(THUMB_SRC_DIR, PHOTO_EXTS)
     if thumb_files:
         save_og_image(os.path.join(THUMB_SRC_DIR, thumb_files[0]))
 
+    # 첫 화면 대형 사진
+    hero_files = list_files(HERO_SRC_DIR, PHOTO_EXTS)
+    has_hero = bool(hero_files)
+    if has_hero:
+        save_resized(os.path.join(HERO_SRC_DIR, hero_files[0]), HERO_IMAGE_PATH,
+                     HERO_MAX_WIDTH, HERO_QUALITY)
+
+    # 갤러리 영상
+    video_files = list_files(VIDEO_DIR, VIDEO_EXTS)
+    for v in video_files:
+        size_mb = os.path.getsize(os.path.join(VIDEO_DIR, v)) / (1024 * 1024)
+        if size_mb > VIDEO_WARN_MB:
+            print(f"경고: Photo/video/{v} ({size_mb:.0f}MB)는 {VIDEO_WARN_MB}MB를 넘습니다. "
+                  f"GitHub 업로드가 거부될 수 있으니 용량을 줄여주세요.")
+
     manifest = {
+        "hero": "hero.jpg" if has_hero else None,
         "photos": sorted(processed_names),
+        "videos": video_files,
         "bgm": list_files(SOUND_DIR, AUDIO_EXTS),
     }
     with open(MANIFEST_PATH, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
     print(f"갤러리 사진 {len(processed_names)}개 리사이즈 완료 (assets/photos)")
+    print(f"갤러리 영상 {len(video_files)}개 (Photo/video)")
     print(f"BGM {len(manifest['bgm'])}개")
+    if has_hero:
+        print(f"메인 사진: Photo/main/{hero_files[0]} -> assets/hero.jpg")
+    else:
+        print("경고: Photo/main/ 폴더에 사진이 없어 메인 대형 사진을 만들지 못했습니다.")
     if thumb_files:
-        print(f"카카오톡 썸네일: Photo/thumbnail/{thumb_files[0]} 사용 -> assets/og-image.jpg")
-        if len(thumb_files) > 1:
-            print(f"  (Photo/thumbnail/에 사진이 {len(thumb_files)}개 있어서 이 중 첫 번째 파일만 사용했습니다)")
+        print(f"카카오톡 썸네일: Photo/thumbnail/{thumb_files[0]} -> assets/og-image.jpg")
     else:
         print("경고: Photo/thumbnail/ 폴더에 사진이 없어 og-image.jpg를 갱신하지 못했습니다.")
 

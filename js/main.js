@@ -4,6 +4,9 @@ const KAKAO_JS_KEY = "d830304ea7198638d5dd2b4f80462923";
 
 // 예식 일시 (한국 시간 기준 고정)
 const WEDDING_AT = new Date("2026-10-10T12:30:00+09:00");
+const WEDDING_YEAR = 2026;
+const WEDDING_MONTH = 10;  // 10월
+const WEDDING_DAY = 10;
 
 // 지도 좌표 / 장소명 (지도 표시 + 길안내 버튼용)
 const VENUE = {
@@ -19,30 +22,221 @@ init();
 async function init() {
   const manifest = await fetch("assets/manifest.json")
     .then((res) => res.json())
-    .catch(() => ({ photos: [], bgm: [] }));
+    .catch(() => ({ hero: null, photos: [], videos: [], bgm: [] }));
 
-  renderGallery(manifest.photos);
+  setupLeaves();
+  renderCalendar();
+  renderCarousel(manifest.photos, manifest.videos || []);
   setupLightbox();
   setupCountdown();
   setupMapLinks();
   setupVenueMap();
   setupZoomPrevention();
   setupBgmPlaylist(manifest.bgm);
+  setupAccountCopy();
+  setupRsvp();
   setupGuestbook();
   setupEntryGate();
   setupKakaoShare();
 }
 
-function renderGallery(photoFiles) {
-  const grid = document.getElementById("gallery-grid");
+/* ---------- 낙엽 파티클 (히어로) ---------- */
+
+// 가을 낙엽(단풍·은행잎)이 메인 사진 위로 흩날리는 캔버스 애니메이션
+function setupLeaves() {
+  const canvas = document.getElementById("leaves-canvas");
+  if (!canvas || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const ctx = canvas.getContext("2d");
+  const COLORS = ["#c96f4a", "#d98e4a", "#e3b23c", "#b3552f", "#dfa552"];
+  const COUNT = 16;
+  let leaves = [];
+  let running = true;
+
+  function resize() {
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  }
+
+  function newLeaf(fromTop) {
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    return {
+      x: Math.random() * w,
+      y: fromTop ? -20 : Math.random() * h,
+      size: 7 + Math.random() * 9,
+      speedY: 0.5 + Math.random() * 0.9,
+      swayAmp: 28 + Math.random() * 40,
+      swayFreq: 0.4 + Math.random() * 0.7,
+      phase: Math.random() * Math.PI * 2,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.03,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      shape: Math.random() < 0.5 ? "maple" : "ginkgo",
+      t: Math.random() * 100
+    };
+  }
+
+  function drawLeaf(l) {
+    ctx.save();
+    ctx.translate(l.x + Math.sin(l.t * l.swayFreq + l.phase) * l.swayAmp * 0.4, l.y);
+    ctx.rotate(l.rot);
+    ctx.fillStyle = l.color;
+    ctx.globalAlpha = 0.86;
+    const s = l.size;
+    ctx.beginPath();
+    if (l.shape === "ginkgo") {
+      // 은행잎: 부채꼴
+      ctx.moveTo(0, s * 0.6);
+      ctx.quadraticCurveTo(-s, s * 0.1, -s * 0.55, -s * 0.55);
+      ctx.quadraticCurveTo(0, -s * 0.15, s * 0.55, -s * 0.55);
+      ctx.quadraticCurveTo(s, s * 0.1, 0, s * 0.6);
+    } else {
+      // 단풍잎: 뾰족한 잎 여러 갈래를 단순화한 별 모양
+      for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+        const outer = s;
+        const inner = s * 0.45;
+        ctx.lineTo(Math.cos(a) * outer, Math.sin(a) * outer);
+        ctx.lineTo(Math.cos(a + Math.PI / 5) * inner, Math.sin(a + Math.PI / 5) * inner);
+      }
+      ctx.closePath();
+    }
+    ctx.fill();
+    ctx.restore();
+  }
+
+  let ticking = false;
+
+  function tick() {
+    if (!running) {
+      ticking = false;
+      return;
+    }
+    ticking = true;
+    ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    leaves.forEach((l) => {
+      l.t += 0.016;
+      l.y += l.speedY;
+      l.rot += l.rotSpeed;
+      if (l.y > canvas.clientHeight + 24) Object.assign(l, newLeaf(true));
+      drawLeaf(l);
+    });
+    requestAnimationFrame(tick);
+  }
+
+  function start() {
+    running = true;
+    if (!ticking) tick();
+  }
+
+  function refresh() {
+    const wasEmpty = canvas.width === 0;
+    resize();
+    if (wasEmpty && canvas.width > 0) {
+      leaves = Array.from({ length: COUNT }, () => newLeaf(false));
+    }
+    start();
+  }
+
+  resize();
+  leaves = Array.from({ length: COUNT }, () => newLeaf(false));
+  // 입장 게이트 때문에 본문이 숨겨진 상태(크기 0)로 초기화될 수 있다.
+  // unlock() 시점에 resize 이벤트가 발생되므로 그때 실제 크기로 다시 계산한다.
+  addEventListener("resize", refresh);
+
+  // 히어로가 화면 밖으로 스크롤되면 애니메이션 정지 (배터리 절약)
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      start();
+    } else {
+      running = false;
+    }
+  }).observe(document.getElementById("hero"));
+
+  start();
+}
+
+/* ---------- 달력 ---------- */
+
+function renderCalendar() {
+  const box = document.getElementById("calendar");
+  const first = new Date(WEDDING_YEAR, WEDDING_MONTH - 1, 1);
+  const daysInMonth = new Date(WEDDING_YEAR, WEDDING_MONTH, 0).getDate();
+  const startDow = first.getDay();
+
+  let html = `<p class="calendar-month">${WEDDING_YEAR}년 ${WEDDING_MONTH}월</p><table><thead><tr>`;
+  const dows = ["일", "월", "화", "수", "목", "금", "토"];
+  dows.forEach((d, i) => {
+    html += `<th class="${i === 0 ? "sun" : ""}">${d}</th>`;
+  });
+  html += "</tr></thead><tbody><tr>";
+
+  for (let i = 0; i < startDow; i++) html += "<td></td>";
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dow = (startDow + day - 1) % 7;
+    if (dow === 0 && day !== 1) html += "</tr><tr>";
+    const cls = [day === WEDDING_DAY ? "wedding-day" : "", dow === 0 ? "sun" : ""].join(" ").trim();
+    html += `<td class="${cls}">${day}</td>`;
+  }
+  html += `</tr></tbody></table><p class="calendar-note">10월 10일 토요일 낮 12시 30분</p>`;
+  box.innerHTML = html;
+}
+
+/* ---------- 갤러리 (스와이프 캐러셀: 사진 + 영상) ---------- */
+
+function renderCarousel(photoFiles, videoFiles) {
+  const carousel = document.getElementById("carousel");
+  const dotsBox = document.getElementById("carousel-dots");
+  const slides = [];
+
   photoFiles.forEach((file) => {
+    const slide = document.createElement("div");
+    slide.className = "slide";
     const img = document.createElement("img");
     img.src = `assets/photos/${encodeURIComponent(file)}`;
     img.loading = "lazy";
     img.draggable = false;
     img.addEventListener("click", () => openLightbox(img.src));
-    grid.appendChild(img);
+    slide.appendChild(img);
+    slides.push(slide);
   });
+
+  videoFiles.forEach((file) => {
+    const slide = document.createElement("div");
+    slide.className = "slide";
+    const video = document.createElement("video");
+    video.src = `Photo/video/${encodeURIComponent(file)}`;
+    video.controls = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    slide.appendChild(video);
+    slides.push(slide);
+  });
+
+  slides.forEach((s) => carousel.appendChild(s));
+
+  // 인디케이터 점
+  slides.forEach((_, i) => {
+    const dot = document.createElement("span");
+    dot.className = "dot" + (i === 0 ? " active" : "");
+    dotsBox.appendChild(dot);
+  });
+
+  carousel.addEventListener("scroll", () => {
+    // 슬라이드 간격(gap)을 포함한 실제 스냅 간격으로 현재 인덱스 계산
+    const stride = slides.length > 1
+      ? slides[1].offsetLeft - slides[0].offsetLeft
+      : carousel.clientWidth;
+    const idx = Math.round(carousel.scrollLeft / stride);
+    [...dotsBox.children].forEach((d, i) => d.classList.toggle("active", i === idx));
+    // 슬라이드가 넘어가면 재생 중이던 영상 일시정지
+    carousel.querySelectorAll("video").forEach((v) => {
+      const slideIdx = slides.findIndex((s) => s.contains(v));
+      if (slideIdx !== idx && !v.paused) v.pause();
+    });
+  }, { passive: true });
 }
 
 /* ---------- 라이트박스 (터치 확대: 최대 배율 제한) ---------- */
@@ -258,6 +452,7 @@ function setupVenueMap() {
   script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
   script.onload = () => {
     kakao.maps.load(() => {
+      placeholder.remove();
       const center = new kakao.maps.LatLng(VENUE.lat, VENUE.lng);
       const map = new kakao.maps.Map(mapBox, { center, level: 4 });
       const marker = new kakao.maps.Marker({ position: center });
@@ -305,7 +500,7 @@ function setupZoomPrevention() {
   );
 
   document.addEventListener("contextmenu", (e) => {
-    if (e.target.tagName === "IMG") e.preventDefault();
+    if (e.target.tagName === "IMG" || e.target.tagName === "VIDEO") e.preventDefault();
   });
 
   document.addEventListener("gesturestart", (e) => {
@@ -351,6 +546,58 @@ function setupBgmPlaylist(bgmFiles) {
   function loadTrack(index) {
     bgm.src = `Sound/${encodeURIComponent(bgmFiles[index])}`;
   }
+}
+
+/* ---------- 계좌번호 복사 ---------- */
+
+function setupAccountCopy() {
+  document.querySelectorAll(".copy-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const number = btn.parentElement.querySelector(".account-number").dataset.copy;
+      try {
+        await navigator.clipboard.writeText(number);
+        const orig = btn.textContent;
+        btn.textContent = "복사됨!";
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      } catch {
+        prompt("아래 계좌번호를 길게 눌러 복사하세요", number);
+      }
+    });
+  });
+}
+
+/* ---------- 참석여부 (RSVP) ---------- */
+
+function setupRsvp() {
+  const form = document.getElementById("rsvp-form");
+  const done = document.getElementById("rsvp-done");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("rsvp-name").value.trim();
+    if (!name) return;
+
+    const side = form.querySelector('input[name="rsvp-side"]:checked').value;
+    const attend = form.querySelector('input[name="rsvp-attend"]:checked').value;
+    const count = parseInt(document.getElementById("rsvp-count").value, 10);
+
+    const btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    try {
+      await db.collection("rsvp").add({
+        name,
+        side,
+        attend,
+        count,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      form.reset();
+      done.hidden = false;
+      setTimeout(() => { done.hidden = true; }, 4000);
+    } finally {
+      btn.disabled = false;
+    }
+  });
 }
 
 /* ---------- 방명록 ---------- */
@@ -431,6 +678,8 @@ function setupEntryGate() {
 
   function unlock() {
     document.body.classList.remove("gate-locked");
+    // 숨겨진 상태에서 크기 0으로 초기화된 요소들(낙엽 캔버스, 지도)의 재계산 유도
+    window.dispatchEvent(new Event("resize"));
   }
 }
 
