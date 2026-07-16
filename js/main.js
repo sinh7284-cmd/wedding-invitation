@@ -86,8 +86,10 @@ function setupLeaves() {
   if (!canvas || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   const ctx = canvas.getContext("2d");
-  const COLORS = ["#c96f4a", "#d98e4a", "#e3b23c", "#b3552f", "#dfa552"];
+  // 비눗방울 느낌의 밝은 파스텔 톤 (반투명으로 그려짐)
+  const COLORS = ["#ffd98e", "#ffe8b8", "#ffc9a3", "#fff3c9", "#ffddc2"];
   const COUNT = 16;
+  const LEAF_ALPHA = 0.45;
   let leaves = [];
   let running = true;
 
@@ -121,7 +123,7 @@ function setupLeaves() {
     ctx.translate(l.x + Math.sin(l.t * l.swayFreq + l.phase) * l.swayAmp * 0.4, l.y);
     ctx.rotate(l.rot);
     ctx.fillStyle = l.color;
-    ctx.globalAlpha = 0.86;
+    ctx.globalAlpha = LEAF_ALPHA;
     const s = l.size;
     ctx.beginPath();
     if (l.shape === "ginkgo") {
@@ -142,6 +144,11 @@ function setupLeaves() {
       ctx.closePath();
     }
     ctx.fill();
+    // 비눗방울처럼 윤곽에 밝은 하이라이트를 살짝 얹는다
+    ctx.globalAlpha = LEAF_ALPHA * 0.7;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
     ctx.restore();
   }
 
