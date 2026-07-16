@@ -25,6 +25,7 @@ async function init() {
     .catch(() => ({ hero: null, photos: [], videos: [], bgm: [] }));
 
   pinHeroHeight();
+  setupHeroMedia(manifest);
   setupLeaves();
   renderCalendar();
   renderCarousel(manifest.photos, manifest.videos || []);
@@ -39,6 +40,27 @@ async function init() {
   setupGuestbook();
   setupEntryGate();
   setupKakaoShare();
+}
+
+/* ---------- 히어로 미디어 (사진/영상) ---------- */
+
+// Photo/main 폴더에 영상(mp4)이 있으면 메인 사진을 배경 영상으로 교체한다.
+// 자동재생은 음소거 상태에서만 허용되며, 재생이 차단되는 환경(저전력 모드 등)
+// 에서는 poster(사진)가 대신 보인다.
+function setupHeroMedia(manifest) {
+  if (!manifest.heroVideo) return;
+  const img = document.getElementById("hero-photo");
+  const video = document.createElement("video");
+  video.className = "hero-photo";
+  video.src = `assets/${encodeURIComponent(manifest.heroVideo)}`;
+  video.muted = true;
+  video.loop = true;
+  video.autoplay = true;
+  video.playsInline = true;
+  video.setAttribute("aria-hidden", "true");
+  if (manifest.hero) video.poster = "assets/hero.jpg";
+  img.replaceWith(video);
+  video.play().catch(() => {});
 }
 
 /* ---------- 히어로 높이 고정 ---------- */

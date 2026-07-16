@@ -2,6 +2,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 
 from PIL import Image, ImageOps
 
@@ -135,6 +136,25 @@ def main():
         save_resized(os.path.join(HERO_SRC_DIR, hero_files[0]), HERO_IMAGE_PATH,
                      HERO_MAX_WIDTH, HERO_QUALITY)
 
+    # 첫 화면 영상 (Photo/main에 mp4를 넣으면 사진 대신 영상이 배경으로 재생됨)
+    assets_dir = os.path.dirname(MANIFEST_PATH)
+    for f in os.listdir(assets_dir):
+        name, ext = os.path.splitext(f)
+        if name == "hero" and ext.lower() in VIDEO_EXTS:
+            os.remove(os.path.join(assets_dir, f))
+    hero_video_files = list_files(HERO_SRC_DIR, VIDEO_EXTS)
+    hero_video = None
+    if hero_video_files:
+        src_name = hero_video_files[0]
+        ext = os.path.splitext(src_name)[1].lower()
+        hero_video = "hero" + ext
+        src_path = os.path.join(HERO_SRC_DIR, src_name)
+        shutil.copyfile(src_path, os.path.join(assets_dir, hero_video))
+        size_mb = os.path.getsize(src_path) / (1024 * 1024)
+        if size_mb > 15:
+            print(f"경고: 메인 영상 {src_name} ({size_mb:.0f}MB)이 큽니다. "
+                  f"첫 화면 로딩이 느려지니 15MB 이하로 줄이는 것을 권장합니다.")
+
     # 갤러리 영상
     video_files = list_files(VIDEO_DIR, VIDEO_EXTS)
     for v in video_files:
@@ -145,6 +165,7 @@ def main():
 
     manifest = {
         "hero": "hero.jpg" if has_hero else None,
+        "heroVideo": hero_video,
         "photos": sorted(processed_names),
         "videos": video_files,
         "bgm": list_files(SOUND_DIR, AUDIO_EXTS),
@@ -159,6 +180,8 @@ def main():
         print(f"메인 사진: Photo/main/{hero_files[0]} -> assets/hero.jpg")
     else:
         print("경고: Photo/main/ 폴더에 사진이 없어 메인 대형 사진을 만들지 못했습니다.")
+    if hero_video:
+        print(f"메인 영상: Photo/main/{hero_video_files[0]} -> assets/{hero_video} (사진 대신 영상 재생)")
     if thumb_files:
         print(f"카카오톡 썸네일: Photo/thumbnail/{thumb_files[0]} -> assets/og-image.jpg")
         if og_version_bumped:
