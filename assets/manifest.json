@@ -1,6 +1,6 @@
 {
-  "hero": null,
-  "heroVideo": "hero.mp4",
+  "hero": "hero.jpg",
+  "heroVideo": null,
   "photos": [
     "KakaoTalk_20260714_091132495.jpg",
     "KakaoTalk_20260714_091132495_02.jpg",
