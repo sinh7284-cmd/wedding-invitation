@@ -1,3 +1,16 @@
+:root {
+  --cream: #faf6ec;
+  --cream-deep: #f3ecdc;
+  --ink: #4a4238;
+  --ink-soft: #6f665a;
+  --sage: #8aa87a;
+  --sage-deep: #5b7355;
+  --sky: #cfe3ee;
+  --sky-deep: #a9c9dc;
+  --peach: #e8b88a;
+  --card: #fffdf7;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -9,13 +22,14 @@ html, body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  background: #faf7f2;
-  color: #2b2b2b;
+  font-family: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
   max-width: 480px;
   margin: 0 auto;
-  line-height: 1.6;
+  line-height: 1.7;
   touch-action: pan-y;
+  box-shadow: 0 0 40px rgba(74, 66, 56, 0.08);
 }
 
 body.gate-locked #invitation-content,
@@ -23,79 +37,301 @@ body.gate-locked #bgm-toggle {
   display: none;
 }
 
+/* ---------- 공통 섹션 ---------- */
+
 .section {
-  padding: 48px 24px;
+  padding: 56px 24px;
   text-align: center;
-  border-bottom: 1px solid #eee5d8;
+}
+
+.section:nth-of-type(even) {
+  background: var(--cream-deep);
 }
 
 .section-title {
-  font-size: 14px;
-  letter-spacing: 4px;
-  color: #b08d57;
-  margin-bottom: 20px;
-  text-transform: uppercase;
+  font-family: "Gowun Batang", serif;
+  font-size: 15px;
+  letter-spacing: 6px;
+  color: var(--sage-deep);
+  margin-bottom: 28px;
+  font-weight: 700;
 }
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--peach);
+  margin: 12px auto 0;
+}
+
+/* ---------- 히어로 ---------- */
 
 #hero {
-  padding: 80px 24px;
+  padding: 0;
 }
 
-.hero-date {
-  color: #b08d57;
-  letter-spacing: 2px;
-  margin-bottom: 16px;
+.hero-sky {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--sky) 0%, #e7f0e2 62%, var(--cream) 100%);
+  padding: 88px 24px 110px;
+  text-align: center;
+}
+
+.cloud {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.85);
+  width: 150px;
+  animation: drift 46s linear infinite;
+}
+
+.cloud-1 {
+  top: 26px;
+  left: -160px;
+}
+
+.cloud-2 {
+  top: 84px;
+  left: -160px;
+  width: 100px;
+  opacity: 0.7;
+  animation-duration: 65s;
+  animation-delay: -30s;
+}
+
+@keyframes drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(100vw + 320px)); }
+}
+
+@media (min-width: 480px) {
+  @keyframes drift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(800px); }
+  }
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-eyebrow {
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: var(--sage-deep);
+  margin-bottom: 22px;
 }
 
 .hero-names {
-  font-size: 32px;
-  font-weight: 400;
-  margin-bottom: 16px;
+  font-family: "Gowun Batang", serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
-.hero-names span {
-  color: #b08d57;
-  margin: 0 8px;
+.hero-names .amp {
+  display: block;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--sage-deep);
+  margin: 6px 0;
+  letter-spacing: 2px;
+}
+
+.hero-divider {
+  color: var(--peach);
+  width: 120px;
+  margin: 14px auto;
+}
+
+.hero-date {
+  font-family: "Gowun Batang", serif;
+  font-size: 15px;
+  color: var(--ink-soft);
+  margin-top: 10px;
 }
 
 .hero-venue {
-  color: #666;
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-top: 4px;
 }
 
+.hero-hill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 90px;
+  z-index: 1;
+}
+
+/* ---------- 인사말 ---------- */
+
 .greeting-text {
-  color: #444;
+  font-family: "Gowun Batang", serif;
+  color: var(--ink);
+  font-size: 15.5px;
 }
 
 .greeting-names {
-  margin-top: 24px;
-  color: #666;
+  margin-top: 26px;
+  color: var(--ink-soft);
   font-size: 14px;
 }
 
 .greeting-names strong {
-  color: #2b2b2b;
-  font-weight: 600;
+  color: var(--ink);
+  font-weight: 700;
+  font-family: "Gowun Batang", serif;
 }
+
+/* ---------- 카운트다운 ---------- */
+
+.countdown-label {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+}
+
+.countdown-grid {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cd-box {
+  background: var(--card);
+  border: 1px solid #e5dcc8;
+  border-radius: 14px;
+  min-width: 66px;
+  padding: 14px 6px 10px;
+  box-shadow: 0 3px 10px rgba(74, 66, 56, 0.06);
+}
+
+.cd-box span {
+  display: block;
+  font-family: "Gowun Batang", serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--sage-deep);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.cd-box small {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.countdown-note {
+  margin-top: 18px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+/* ---------- 갤러리 ---------- */
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 
 .gallery-grid img {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
+  border-radius: 14px;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
   touch-action: pan-y;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(74, 66, 56, 0.1);
 }
+
+/* ---------- 라이트박스 ---------- */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(38, 34, 28, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox[hidden] {
+  display: none;
+}
+
+.lightbox-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.lightbox-stage img {
+  max-width: 100%;
+  max-height: 100%;
+  transform-origin: center center;
+  will-change: transform;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+/* ---------- 오시는 길 ---------- */
 
 .location-address {
   margin-bottom: 20px;
-  color: #444;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+}
+
+.venue-map {
+  width: 100%;
+  height: 260px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e5dcc8;
+  background: var(--card);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.venue-map-placeholder {
+  color: var(--ink-soft);
+  font-size: 13px;
+  padding: 0 20px;
 }
 
 .map-links {
@@ -107,42 +343,48 @@ body.gate-locked #bgm-toggle {
 .map-btn {
   flex: 1;
   max-width: 120px;
-  padding: 10px;
-  border: 1px solid #b08d57;
-  border-radius: 6px;
-  color: #b08d57;
+  padding: 11px;
+  border: 1px solid var(--sage);
+  border-radius: 999px;
+  color: var(--sage-deep);
+  background: var(--card);
   text-decoration: none;
   font-size: 13px;
 }
+
+/* ---------- 방명록 ---------- */
 
 .guestbook-form {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 
 .guestbook-form input,
 .guestbook-form textarea {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  padding: 13px;
+  border: 1px solid #e0d7c3;
+  border-radius: 12px;
   font-size: 14px;
   font-family: inherit;
+  background: var(--card);
+  color: var(--ink);
 }
 
 .guestbook-form textarea {
-  min-height: 80px;
+  min-height: 84px;
   resize: vertical;
 }
 
 .guestbook-form button {
-  padding: 12px;
+  padding: 13px;
   border: none;
-  border-radius: 6px;
-  background: #b08d57;
+  border-radius: 999px;
+  background: var(--sage-deep);
   color: #fff;
   font-size: 14px;
+  font-family: inherit;
   cursor: pointer;
 }
 
@@ -155,55 +397,73 @@ body.gate-locked #bgm-toggle {
 }
 
 .guestbook-list li {
-  background: #fff;
-  border-radius: 8px;
-  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid #ece4d2;
+  border-radius: 14px;
+  padding: 13px 16px;
 }
 
 .guestbook-list .g-name {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
-  color: #b08d57;
+  color: var(--sage-deep);
   margin-bottom: 4px;
+  font-family: "Gowun Batang", serif;
 }
 
 .guestbook-list .g-message {
   font-size: 14px;
-  color: #333;
+  color: var(--ink);
   white-space: pre-wrap;
 }
 
+/* ---------- 공유 / 푸터 ---------- */
+
 .kakao-share-btn {
   width: 100%;
-  padding: 14px;
+  padding: 15px;
   border: none;
-  border-radius: 8px;
+  border-radius: 999px;
   background: #fee500;
   color: #3c1e1e;
   font-size: 15px;
   font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
 }
+
+.footer-note {
+  margin-top: 26px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-family: "Gowun Batang", serif;
+}
+
+/* ---------- BGM 토글 ---------- */
 
 .bgm-toggle {
   position: fixed;
   right: 16px;
   bottom: 16px;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  border: none;
-  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(91, 115, 85, 0.88);
   color: #fff;
   font-size: 18px;
   z-index: 50;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(74, 66, 56, 0.25);
 }
+
+/* ---------- 입장 게이트 ---------- */
 
 .entry-gate {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: #faf7f2;
+  background: linear-gradient(180deg, var(--sky) 0%, var(--cream) 70%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,14 +479,17 @@ body.gate-locked #bgm-toggle {
 }
 
 .entry-gate-title {
-  font-size: 20px;
+  font-family: "Gowun Batang", serif;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 8px;
-  color: #b08d57;
+  color: var(--sage-deep);
 }
 
 .entry-gate-desc {
-  color: #666;
+  color: var(--ink-soft);
   margin-bottom: 20px;
+  font-size: 14px;
 }
 
 .entry-gate-box input {
@@ -235,24 +498,26 @@ body.gate-locked #bgm-toggle {
   margin: 0 auto 12px;
   padding: 12px;
   text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid #e0d7c3;
+  border-radius: 12px;
   font-size: 16px;
+  background: var(--card);
 }
 
 .entry-gate-box button {
   width: 200px;
   padding: 12px;
   border: none;
-  border-radius: 6px;
-  background: #b08d57;
+  border-radius: 999px;
+  background: var(--sage-deep);
   color: #fff;
   font-size: 14px;
+  font-family: inherit;
   cursor: pointer;
 }
 
 .error-msg {
-  color: #c0392b;
+  color: #b0563f;
   font-size: 13px;
   margin-top: 12px;
 }

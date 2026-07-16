@@ -11,8 +11,13 @@
 <meta property="og:title" content="허웅 ♥ 홍세정, 결혼합니다">
 <meta property="og:description" content="2026년 10월 10일 토요일 낮 12시 30분, 카이스트 노천극장">
 <meta property="og:image" content="https://wedding-invitation-beta-lime.vercel.app/assets/og-image.jpg">
+<meta property="og:image:width" content="800">
+<meta property="og:image:height" content="400">
 <meta property="og:url" content="https://wedding-invitation-beta-lime.vercel.app/">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="gate-locked">
@@ -29,10 +34,32 @@
 
 <main id="invitation-content">
 
-  <section id="hero" class="section">
-    <p class="hero-date">2026. 10. 10. SAT PM 12:30</p>
-    <h1 class="hero-names">허웅 <span>&amp;</span> 홍세정</h1>
-    <p class="hero-venue">카이스트 노천극장</p>
+  <section id="hero">
+    <div class="hero-sky">
+      <svg class="cloud cloud-1" viewBox="0 0 200 60" aria-hidden="true">
+        <ellipse cx="60" cy="40" rx="50" ry="18" fill="currentColor"/>
+        <ellipse cx="110" cy="30" rx="45" ry="20" fill="currentColor"/>
+        <ellipse cx="150" cy="42" rx="40" ry="14" fill="currentColor"/>
+      </svg>
+      <svg class="cloud cloud-2" viewBox="0 0 200 60" aria-hidden="true">
+        <ellipse cx="60" cy="40" rx="50" ry="18" fill="currentColor"/>
+        <ellipse cx="110" cy="30" rx="45" ry="20" fill="currentColor"/>
+        <ellipse cx="150" cy="42" rx="40" ry="14" fill="currentColor"/>
+      </svg>
+      <div class="hero-inner">
+        <p class="hero-eyebrow">WEDDING INVITATION</p>
+        <h1 class="hero-names">허웅 <span class="amp">그리고</span> 홍세정</h1>
+        <div class="hero-divider" aria-hidden="true">
+          <svg viewBox="0 0 120 20"><path d="M5 12 Q 30 2, 60 12 T 115 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <p class="hero-date">2026년 10월 10일 토요일 낮 12시 30분</p>
+        <p class="hero-venue">카이스트 노천극장</p>
+      </div>
+      <svg class="hero-hill" viewBox="0 0 375 90" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,90 L0,55 Q 90,10 190,45 T 375,35 L375,90 Z" fill="#a8bf97"/>
+        <path d="M0,90 L0,70 Q 120,35 240,62 T 375,58 L375,90 Z" fill="#8aa87a"/>
+      </svg>
+    </div>
   </section>
 
   <section id="greeting" class="section">
@@ -49,6 +76,18 @@
     </p>
   </section>
 
+  <section id="countdown" class="section">
+    <h2 class="section-title">우리의 날</h2>
+    <p id="countdown-label" class="countdown-label">결혼식까지 남은 시간</p>
+    <div class="countdown-grid" aria-live="off">
+      <div class="cd-box"><span id="cd-days">0</span><small>일</small></div>
+      <div class="cd-box"><span id="cd-hours">0</span><small>시간</small></div>
+      <div class="cd-box"><span id="cd-mins">0</span><small>분</small></div>
+      <div class="cd-box"><span id="cd-secs">0</span><small>초</small></div>
+    </div>
+    <p id="countdown-note" class="countdown-note"></p>
+  </section>
+
   <section id="gallery" class="section">
     <h2 class="section-title">우리의 순간</h2>
     <div id="gallery-grid" class="gallery-grid">
@@ -59,6 +98,9 @@
   <section id="location" class="section">
     <h2 class="section-title">오시는 길</h2>
     <p class="location-address">카이스트 노천극장<br>대전광역시 유성구 대학로 291 (KAIST 본원)</p>
+    <div id="map" class="venue-map">
+      <p class="venue-map-placeholder">지도를 불러오는 중입니다…</p>
+    </div>
     <div class="map-links">
       <a class="map-btn" id="link-tmap" href="#">티맵</a>
       <a class="map-btn" id="link-kakaomap" href="#">카카오맵</a>
@@ -78,9 +120,17 @@
 
   <section id="share" class="section">
     <button id="kakao-share-btn" class="kakao-share-btn" type="button">카카오톡으로 공유하기</button>
+    <p class="footer-note">허웅 · 홍세정의 결혼식에 초대합니다</p>
   </section>
 
 </main>
+
+<div id="lightbox" class="lightbox" hidden>
+  <button id="lightbox-close" class="lightbox-close" type="button" aria-label="닫기">✕</button>
+  <div id="lightbox-stage" class="lightbox-stage">
+    <img id="lightbox-img" src="" alt="사진 크게 보기" draggable="false">
+  </div>
+</div>
 
 <button id="bgm-toggle" class="bgm-toggle" type="button" aria-label="배경음악 재생">🔇</button>
 <audio id="bgm" preload="none"></audio>

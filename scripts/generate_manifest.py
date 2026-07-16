@@ -16,8 +16,10 @@ AUDIO_EXTS = {".mp3", ".m4a", ".ogg"}
 
 GALLERY_MAX_WIDTH = 1600
 GALLERY_QUALITY = 82
-OG_SIZE = (1200, 630)
+# 카카오톡 미리보기가 이미지를 자르지 않도록 2:1 비율 + 여백(contain) 방식 사용
+OG_SIZE = (800, 400)
 OG_QUALITY = 85
+OG_BG_COLOR = (250, 246, 236)  # 청첩장 배경과 같은 크림색
 
 
 def list_files(directory, exts):
@@ -42,22 +44,18 @@ def save_gallery_photo(src_path, out_name):
 
 
 def save_og_image(src_path):
+    # 사진을 자르지 않고 2:1 캔버스 안에 통째로 넣는다 (남는 부분은 크림색 여백).
     img = load_image(src_path)
     target_w, target_h = OG_SIZE
-    target_ratio = target_w / target_h
-    src_ratio = img.width / img.height
 
-    if src_ratio > target_ratio:
-        new_w = int(img.height * target_ratio)
-        left = (img.width - new_w) // 2
-        img = img.crop((left, 0, left + new_w, img.height))
-    else:
-        new_h = int(img.width / target_ratio)
-        top = (img.height - new_h) // 2
-        img = img.crop((0, top, img.width, top + new_h))
+    ratio = min(target_w / img.width, target_h / img.height)
+    fit_w = int(img.width * ratio)
+    fit_h = int(img.height * ratio)
+    img = img.resize((fit_w, fit_h), Image.LANCZOS)
 
-    img = img.resize(OG_SIZE, Image.LANCZOS)
-    img.save(OG_IMAGE_PATH, quality=OG_QUALITY, optimize=True)
+    canvas = Image.new("RGB", OG_SIZE, OG_BG_COLOR)
+    canvas.paste(img, ((target_w - fit_w) // 2, (target_h - fit_h) // 2))
+    canvas.save(OG_IMAGE_PATH, quality=OG_QUALITY, optimize=True)
 
 
 def main():
