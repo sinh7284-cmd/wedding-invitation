@@ -2,9 +2,16 @@
   "hero": "hero.jpg",
   "photos": [
     "ZINS3924.jpg",
-    "ZINS4034.jpg"
+    "ZINS4034.jpg",
+    "ZINS4098.jpg",
+    "ZINS4244.jpg",
+    "ZINS4248.jpg",
+    "ZINS4468.jpg",
+    "ZINS4746.jpg"
   ],
-  "videos": [],
+  "videos": [
+    "video1.mp4"
+  ],
   "bgm": [
     "지브리스타일_bgm2.mp3",
     "지프리스타일_bgm1.mp3"
