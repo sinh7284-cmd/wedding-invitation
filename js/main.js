@@ -1,9 +1,3 @@
-// Photo 폴더에 사진을 추가할 때마다 파일명을 여기에 추가하세요.
-const PHOTO_FILES = ["ZINS3924.jpg", "ZINS4034.jpg"];
-
-// Sound 폴더의 배경음악 파일명
-const BGM_FILE = "지프리스타일_bgm1.mp3";
-
 // 카카오 디벨로퍼스(https://developers.kakao.com)에서 발급받은 JavaScript 키
 const KAKAO_JS_KEY = "REPLACE_ME";
 
@@ -14,17 +8,27 @@ const VENUE = {
   lng: 126.9780
 };
 
-renderGallery();
-setupMapLinks();
-setupZoomPrevention();
-setupBgmToggle();
-setupGuestbook();
-setupEntryGate();
-setupKakaoShare();
+init();
 
-function renderGallery() {
+// Photo/Sound 폴더에 파일을 추가/삭제한 뒤 update-media.bat을 실행하면
+// assets/manifest.json이 다시 생성되어 이 목록이 자동으로 갱신됩니다.
+async function init() {
+  const manifest = await fetch("assets/manifest.json")
+    .then((res) => res.json())
+    .catch(() => ({ photos: [], bgm: [] }));
+
+  renderGallery(manifest.photos);
+  setupMapLinks();
+  setupZoomPrevention();
+  setupBgmPlaylist(manifest.bgm);
+  setupGuestbook();
+  setupEntryGate();
+  setupKakaoShare();
+}
+
+function renderGallery(photoFiles) {
   const grid = document.getElementById("gallery-grid");
-  PHOTO_FILES.forEach((file) => {
+  photoFiles.forEach((file) => {
     const img = document.createElement("img");
     img.src = `Photo/${encodeURIComponent(file)}`;
     img.loading = "lazy";
@@ -73,11 +77,27 @@ function setupZoomPrevention() {
   document.addEventListener("gesturestart", (e) => e.preventDefault());
 }
 
-function setupBgmToggle() {
+// 여러 곡을 순서대로 재생하다가 마지막 곡이 끝나면 첫 곡으로 돌아가
+// 재생목록 전체를 무한 반복합니다.
+function setupBgmPlaylist(bgmFiles) {
   const bgm = document.getElementById("bgm");
   const btn = document.getElementById("bgm-toggle");
-  bgm.src = `Sound/${encodeURIComponent(BGM_FILE)}`;
+
+  if (!bgmFiles || bgmFiles.length === 0) {
+    btn.hidden = true;
+    return;
+  }
+
+  let trackIndex = 0;
   let playing = false;
+
+  loadTrack(trackIndex);
+
+  bgm.addEventListener("ended", () => {
+    trackIndex = (trackIndex + 1) % bgmFiles.length;
+    loadTrack(trackIndex);
+    bgm.play().catch(() => {});
+  });
 
   btn.addEventListener("click", () => {
     if (playing) {
@@ -89,6 +109,10 @@ function setupBgmToggle() {
     }
     playing = !playing;
   });
+
+  function loadTrack(index) {
+    bgm.src = `Sound/${encodeURIComponent(bgmFiles[index])}`;
+  }
 }
 
 function setupGuestbook() {
