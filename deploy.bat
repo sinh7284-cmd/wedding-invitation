@@ -29,7 +29,7 @@ echo ========================================
 echo   3. GitHub에 업로드 (자동 배포 시작)
 echo ========================================
 git add -A
-git commit -m "사이트 내용 업데이트"
+git commit -m "Update site content"
 git push
 if errorlevel 1 (
     echo.
