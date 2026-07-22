@@ -162,10 +162,10 @@ function renderContacts(contacts) {
     rows.forEach((row) => {
       const digits = (row["전화"] || "").replace(/[^0-9]/g, "");
       const phoneIcon =
-        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">' +
         '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.6 2z"/></svg>';
       const smsIcon =
-        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">' +
         '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
       const li = document.createElement("li");
       li.innerHTML =
@@ -184,7 +184,10 @@ function renderContacts(contacts) {
 
 function setupSectionNav() {
   const nav = document.getElementById("section-nav");
-  const links = [...nav.querySelectorAll("a")];
+  const scroller = document.getElementById("nav-scroll");
+  const arrowLeft = document.getElementById("nav-arrow-left");
+  const arrowRight = document.getElementById("nav-arrow-right");
+  const links = [...scroller.querySelectorAll("a")];
   const sections = links.map((a) => document.querySelector(a.getAttribute("href")));
 
   links.forEach((a) => {
@@ -194,6 +197,19 @@ function setupSectionNav() {
       if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
+
+  // 좌우 화살표: 끝에 도달하면 해당 방향 화살표를 숨겨
+  // 첫/마지막 메뉴가 화살표에 가려 못 누르는 일이 없게 한다.
+  function updateArrows() {
+    const max = scroller.scrollWidth - scroller.clientWidth;
+    arrowLeft.hidden = scroller.scrollLeft <= 4;
+    arrowRight.hidden = scroller.scrollLeft >= max - 4;
+  }
+
+  arrowLeft.addEventListener("click", () => scroller.scrollBy({ left: -140, behavior: "smooth" }));
+  arrowRight.addEventListener("click", () => scroller.scrollBy({ left: 140, behavior: "smooth" }));
+  scroller.addEventListener("scroll", updateArrows, { passive: true });
+  window.addEventListener("resize", updateArrows);
 
   function updateActive() {
     const pos = window.scrollY + window.innerHeight * 0.35;
@@ -209,6 +225,7 @@ function setupSectionNav() {
 
   window.addEventListener("scroll", updateActive, { passive: true });
   updateActive();
+  updateArrows();
 }
 
 /* ---------- 히어로 미디어 (사진/영상) ---------- */
