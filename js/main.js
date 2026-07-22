@@ -2,14 +2,13 @@
 // (카카오맵 표시 + 카카오톡 공유 버튼에 함께 사용됩니다)
 const KAKAO_JS_KEY = "d830304ea7198638d5dd2b4f80462923";
 
-// 예식 일시 (한국 시간 기준 고정)
-const WEDDING_AT = new Date("2026-10-10T12:30:00+09:00");
-const WEDDING_YEAR = 2026;
-const WEDDING_MONTH = 10;  // 10월
-const WEDDING_DAY = 10;
-
-// 지도 좌표 / 장소명 (지도 표시 + 길안내 버튼용)
-const VENUE = {
+// 아래 값들은 content.json이 로드되면 그 내용으로 덮어써집니다.
+// (문구/계좌/연락처 수정은 content.json에서 하세요)
+let WEDDING_AT = new Date("2026-10-10T12:30:00+09:00");
+let WEDDING_YEAR = 2026;
+let WEDDING_MONTH = 10;
+let WEDDING_DAY = 10;
+let VENUE = {
   name: "카이스트 노천극장",
   lat: 36.3707615,
   lng: 127.3579429
@@ -17,12 +16,19 @@ const VENUE = {
 
 init();
 
-// Photo/Sound 폴더에 파일을 추가/삭제한 뒤 deploy.bat을 실행하면
-// assets/manifest.json이 다시 생성되어 이 목록이 자동으로 갱신됩니다.
+// Photo/Sound 폴더에 파일을 추가/삭제하거나 content.json의 문구를 고친 뒤
+// deploy.bat을 실행하면 사이트에 반영됩니다.
 async function init() {
-  const manifest = await fetch("assets/manifest.json")
-    .then((res) => res.json())
-    .catch(() => ({ hero: null, photos: [], videos: [], bgm: [] }));
+  const [manifest, content] = await Promise.all([
+    fetch("assets/manifest.json")
+      .then((res) => res.json())
+      .catch(() => ({ hero: null, photos: [], videos: [], bgm: [] })),
+    fetch("content.json")
+      .then((res) => res.json())
+      .catch(() => null)
+  ]);
+
+  if (content) applyContent(content);
 
   pinHeroHeight();
   setupHeroMedia(manifest);
@@ -40,6 +46,163 @@ async function init() {
   setupGuestbook();
   setupEntryGate();
   setupKakaoShare();
+  setupSectionNav();
+}
+
+/* ---------- content.json 내용 적용 ---------- */
+
+function applyContent(c) {
+  // 예식 일시 / 장소
+  if (c["예식일시"]) {
+    WEDDING_AT = new Date(c["예식일시"]);
+    const m = c["예식일시"].match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) {
+      WEDDING_YEAR = parseInt(m[1], 10);
+      WEDDING_MONTH = parseInt(m[2], 10);
+      WEDDING_DAY = parseInt(m[3], 10);
+    }
+  }
+  if (c["장소명"]) VENUE.name = c["장소명"];
+  if (c["지도위도"]) VENUE.lat = c["지도위도"];
+  if (c["지도경도"]) VENUE.lng = c["지도경도"];
+
+  const setText = (selector, text) => {
+    const el = document.querySelector(selector);
+    if (el && text) el.textContent = text;
+  };
+
+  // 히어로
+  const heroNames = document.querySelector(".hero-names");
+  if (heroNames && c["신랑이름"] && c["신부이름"]) {
+    heroNames.innerHTML = `${escapeHtml(c["신랑이름"])} <span class="amp">그리고</span> ${escapeHtml(c["신부이름"])}`;
+  }
+  setText(".hero-date", c["예식일시문구"]);
+  setText(".hero-venue", c["장소명"]);
+
+  // 인사말
+  if (Array.isArray(c["인사말"])) {
+    document.querySelector(".greeting-text").innerHTML =
+      c["인사말"].map((line) => (line === "" ? "" : escapeHtml(line))).join("<br>");
+  }
+  const parents = document.querySelector(".greeting-parents");
+  if (parents && c["신랑혼주"] && c["신부혼주"]) {
+    parents.innerHTML =
+      `<span class="parents-line">${escapeHtml(c["신랑혼주"])}<small>의 아들</small><strong>${escapeHtml(c["신랑끝자"] || c["신랑이름"])}</strong></span>` +
+      `<span class="parents-line">${escapeHtml(c["신부혼주"])}<small>의 딸</small><strong>${escapeHtml(c["신부끝자"] || c["신부이름"])}</strong></span>`;
+  }
+
+  // 섹션 제목
+  const titleMap = {
+    greeting: "인사말", countdown: "우리의날", gallery: "갤러리", location: "오시는길",
+    gift: "마음전하실곳", contacts: "연락처", rsvp: "참석여부", guestbook: "축하메시지"
+  };
+  const titles = c["섹션제목"] || {};
+  Object.entries(titleMap).forEach(([sectionId, key]) => {
+    const h2 = document.querySelector(`#${sectionId} .section-title`);
+    if (h2 && titles[key]) h2.textContent = titles[key];
+  });
+
+  // 오시는 길
+  const addr = document.querySelector(".location-address");
+  if (addr && c["장소명"] && c["주소"]) {
+    addr.innerHTML = `${escapeHtml(c["장소명"])}<br>${escapeHtml(c["주소"])}`;
+  }
+
+  // 마음 전하실 곳
+  if (c["계좌안내문구"]) {
+    document.querySelector(".gift-desc").innerHTML =
+      c["계좌안내문구"].split("\n").map(escapeHtml).join("<br>");
+  }
+  if (c["계좌번호"]) renderAccounts(c["계좌번호"]);
+
+  // 연락처
+  if (c["연락처"]) renderContacts(c["연락처"]);
+
+  // 참석여부 안내
+  if (c["참석여부안내"]) {
+    document.querySelector(".rsvp-desc").innerHTML =
+      c["참석여부안내"].split("\n").map(escapeHtml).join("<br>");
+  }
+
+  // 하단 문구
+  setText(".footer-note", c["하단문구"]);
+}
+
+function renderAccounts(accounts) {
+  const groups = document.querySelectorAll("#gift .account-group");
+  const sides = ["신랑측", "신부측"];
+  groups.forEach((group, i) => {
+    const side = sides[i];
+    const rows = accounts[side];
+    if (!rows) return;
+    group.querySelector("summary").textContent = `${side} 계좌번호`;
+    const ul = group.querySelector(".account-list");
+    ul.innerHTML = "";
+    rows.forEach((row) => {
+      const li = document.createElement("li");
+      li.innerHTML =
+        `<div class="account-info"><small>${escapeHtml(row["관계"])}</small>` +
+        `<span class="account-holder">${escapeHtml(row["이름"])}</span>` +
+        `<span class="account-number">${escapeHtml(row["계좌"])}</span></div>` +
+        `<button class="copy-btn" type="button">복사</button>`;
+      ul.appendChild(li);
+    });
+  });
+}
+
+function renderContacts(contacts) {
+  const targets = {
+    "신랑측": document.getElementById("contact-list-groom"),
+    "신부측": document.getElementById("contact-list-bride")
+  };
+  Object.entries(targets).forEach(([side, ul]) => {
+    const rows = contacts[side];
+    if (!ul || !rows) return;
+    ul.innerHTML = "";
+    rows.forEach((row) => {
+      const digits = (row["전화"] || "").replace(/[^0-9]/g, "");
+      const li = document.createElement("li");
+      li.innerHTML =
+        `<div class="contact-info"><small>${escapeHtml(row["관계"])}</small>` +
+        `<span class="contact-name">${escapeHtml(row["이름"])}</span></div>` +
+        `<div class="contact-btns">` +
+        `<a class="contact-btn call" href="tel:${digits}" aria-label="전화 걸기">📞</a>` +
+        `<a class="contact-btn sms" href="sms:${digits}" aria-label="문자 보내기">✉️</a>` +
+        `</div>`;
+      ul.appendChild(li);
+    });
+  });
+}
+
+/* ---------- 하단 바로가기 내비게이션 ---------- */
+
+function setupSectionNav() {
+  const nav = document.getElementById("section-nav");
+  const links = [...nav.querySelectorAll("a")];
+  const sections = links.map((a) => document.querySelector(a.getAttribute("href")));
+
+  links.forEach((a) => {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute("href"));
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+
+  function updateActive() {
+    const pos = window.scrollY + window.innerHeight * 0.35;
+    let activeIdx = -1;
+    sections.forEach((sec, i) => {
+      if (sec && sec.offsetTop <= pos) activeIdx = i;
+    });
+    links.forEach((a, i) => a.classList.toggle("active", i === activeIdx));
+    if (activeIdx >= 0) {
+      links[activeIdx].scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+    }
+  }
+
+  window.addEventListener("scroll", updateActive, { passive: true });
+  updateActive();
 }
 
 /* ---------- 히어로 미디어 (사진/영상) ---------- */
@@ -327,8 +490,9 @@ function renderCarousel(photoFiles, videoFiles) {
 
 /* ---------- 라이트박스 (터치 확대: 최대 배율 제한) ---------- */
 
-const LIGHTBOX_MAX_SCALE = 3;
-const LIGHTBOX_DOUBLE_TAP_SCALE = 2;
+// 1 = 확대(핀치줌/더블탭줌) 완전 차단. 큰 화면 보기만 허용.
+const LIGHTBOX_MAX_SCALE = 1;
+const LIGHTBOX_DOUBLE_TAP_SCALE = 1;
 let lbState = null;
 
 function openLightbox(src) {
@@ -545,9 +709,18 @@ function setupVenueMap() {
       marker.setMap(map);
       const overlay = new kakao.maps.CustomOverlay({
         position: center,
-        content: '<div style="padding:4px 10px;background:#fffdf7;border:1px solid #8aa87a;border-radius:999px;font-size:12px;color:#5b7355;transform:translateY(-40px);">카이스트 노천극장</div>'
+        content: `<div style="padding:4px 10px;background:#fffdf7;border:1px solid #8aa87a;border-radius:999px;font-size:12px;color:#5b7355;transform:translateY(-40px);">${VENUE.name}</div>`
       });
       overlay.setMap(map);
+
+      // 입장 게이트 등으로 숨겨진 상태에서 초기화되면 중심이 어긋나므로
+      // 크기가 바뀔 때마다 지도를 다시 정렬하고 장소를 중앙에 놓는다.
+      const recenter = () => {
+        map.relayout();
+        map.setCenter(center);
+      };
+      window.addEventListener("resize", recenter);
+      setTimeout(recenter, 300);
     });
   };
   script.onerror = () => {
