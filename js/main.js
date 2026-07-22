@@ -161,13 +161,19 @@ function renderContacts(contacts) {
     ul.innerHTML = "";
     rows.forEach((row) => {
       const digits = (row["전화"] || "").replace(/[^0-9]/g, "");
+      const phoneIcon =
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.6 2z"/></svg>';
+      const smsIcon =
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
       const li = document.createElement("li");
       li.innerHTML =
         `<div class="contact-info"><small>${escapeHtml(row["관계"])}</small>` +
         `<span class="contact-name">${escapeHtml(row["이름"])}</span></div>` +
         `<div class="contact-btns">` +
-        `<a class="contact-btn call" href="tel:${digits}" aria-label="전화 걸기">📞</a>` +
-        `<a class="contact-btn sms" href="sms:${digits}" aria-label="문자 보내기">✉️</a>` +
+        `<a class="contact-btn call" href="tel:${digits}" aria-label="전화 걸기">${phoneIcon}</a>` +
+        `<a class="contact-btn sms" href="sms:${digits}" aria-label="문자 보내기">${smsIcon}</a>` +
         `</div>`;
       ul.appendChild(li);
     });
